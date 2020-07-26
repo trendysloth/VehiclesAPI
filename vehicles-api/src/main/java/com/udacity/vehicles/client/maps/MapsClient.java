@@ -19,8 +19,7 @@ public class MapsClient {
     private final WebClient client;
     private final ModelMapper mapper;
 
-    public MapsClient(WebClient maps,
-            ModelMapper mapper) {
+    public MapsClient(WebClient maps, ModelMapper mapper) {
         this.client = maps;
         this.mapper = mapper;
     }
@@ -34,14 +33,14 @@ public class MapsClient {
     public Location getAddress(Location location) {
         try {
             Address address = client
-                    .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/maps/")
-                            .queryParam("lat", location.getLat())
-                            .queryParam("lon", location.getLon())
-                            .build()
-                    )
-                    .retrieve().bodyToMono(Address.class).block();
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/maps/")
+                    .queryParam("lat", location.getLat())
+                    .queryParam("lon", location.getLon())
+                    .build()
+                )
+                .retrieve().bodyToMono(Address.class).block();
 
             mapper.map(Objects.requireNonNull(address), location);
 
