@@ -46,6 +46,8 @@ class CarController {
     @GetMapping
     Resources<Resource<Car>> list() {
         List<Resource<Car>> resources = carService.list().stream().map(assembler::toResource).collect(Collectors.toList());
+        System.out.println(resources);
+        System.out.println(new Resources<>(resources, linkTo(methodOn(CarController.class).list()).withSelfRel()));
         return new Resources<>(resources, linkTo(methodOn(CarController.class).list()).withSelfRel());
     }
 
@@ -109,6 +111,7 @@ class CarController {
         /**
          * TODO: Use the Car Service to delete the requested vehicle.
          */
+        carService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

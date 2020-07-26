@@ -8,7 +8,9 @@ import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Implements the car service create, read, update or delete
@@ -19,17 +21,17 @@ import org.springframework.stereotype.Service;
 public class CarService {
 
     private final CarRepository repository;
-    private final PriceClient priceClient;
-    private final MapsClient mapsClient;
+    private final WebClient webClientMaps;
+    private final WebClient webClientPricing;
 
-    public CarService(CarRepository repository, PriceClient priceClient, MapsClient mapsClient) {
+    public CarService(CarRepository repository, @Qualifier("maps") WebClient webClientMaps, @Qualifier("pricing") WebClient webClientPricing) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
          */
         this.repository = repository;
-        this.priceClient = priceClient;
-        this.mapsClient = mapsClient;
+        this.webClientMaps = webClientMaps;
+        this.webClientPricing = webClientPricing;
     }
 
     /**
@@ -37,6 +39,8 @@ public class CarService {
      * @return a list of all vehicles in the CarRepository
      */
     public List<Car> list() {
+        System.out.println("repository...");
+        System.out.println(repository.findAll());
         return repository.findAll();
     }
 
@@ -66,20 +70,7 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
-        Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
-        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
-        try {
-            String priceString = priceClient.getPrice(id);
-            car.setPrice(priceString);
-        } catch (Exception e) {
-            return null;
-        }
-        try {
-            Location location = mapsClient.getAddress(car.getLocation());
-            car.setLocation(location);
-        } catch (Exception e) {
-            return null;
-        }
+        Car car = new Car();
         return car;
     }
 
