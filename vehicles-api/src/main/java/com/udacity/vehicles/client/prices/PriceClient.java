@@ -40,9 +40,7 @@ public class PriceClient {
                             .build()
                     )
                     .retrieve().bodyToMono(Price.class).block();
-
             return String.format("%s %s", price.getCurrency(), price.getPrice());
-
         } catch (Exception e) {
             log.error("Unexpected error retrieving price for vehicle {}", vehicleId, e);
         }
