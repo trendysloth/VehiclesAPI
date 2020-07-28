@@ -8,8 +8,10 @@ import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -19,19 +21,16 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Service
 public class CarService {
-
     private final CarRepository repository;
-    private final WebClient webClientMaps;
-    private final WebClient webClientPricing;
+    private final MapsClient webClientMaps;
+    private final PriceClient webClientPricing;
 
-    public CarService(CarRepository repository, @Qualifier("maps") WebClient webClientMaps, @Qualifier("pricing") WebClient webClientPricing) {
-        /**
-         * TODO: Add the Maps and Pricing Web Clients you create
-         *   in `VehiclesApiApplication` as arguments and set them here.
-         */
+    public CarService(@ModelAttribute ModelMapper modelMapper, CarRepository repository,
+                      @Qualifier("maps") WebClient webClientMaps,
+                      @Qualifier("pricing") WebClient webClientPricing) {
         this.repository = repository;
-        this.webClientMaps = webClientMaps;
-        this.webClientPricing = webClientPricing;
+        this.webClientMaps = new MapsClient(webClientMaps, modelMapper);
+        this.webClientPricing = new PriceClient(webClientPricing);
     }
 
     /**
@@ -70,7 +69,21 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
-        Car car = new Car();
+        Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
+        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
+        try {
+            String priceString = webClientPricing.getPrice(id);
+            car.setPrice(priceString);
+        } catch (Exception e) {
+            return null;
+        }
+        try {
+            Location location = webClientMaps.getAddress(car.getLocation());
+            car.setLocation(location);
+        } catch (Exception e) {
+            return null;
+        }
+
         return car;
     }
 
@@ -88,7 +101,6 @@ public class CarService {
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
-
         return repository.save(car);
     }
 
