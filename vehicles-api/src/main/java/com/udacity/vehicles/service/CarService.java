@@ -8,6 +8,7 @@ import com.udacity.vehicles.domain.car.CarRepository;
 import java.util.List;
 import java.util.Optional;
 
+import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -100,8 +101,16 @@ public class CarService {
                         carToBeUpdated.setCondition(car.getCondition());
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
+        } else {
+//            System.out.println(car.getLocation());
+//            System.out.println(car.getCondition());
+//            System.out.println(car.getCreatedAt());
+//            System.out.println(car.getDetails());
+//            System.out.println(car.getLocation());
+//            System.out.println(car.getModifiedAt());
+//            System.out.println(car.getPrice());
+            return repository.save(car);
         }
-        return repository.save(car);
     }
 
     /**
