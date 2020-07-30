@@ -39,8 +39,6 @@ public class CarService {
      * @return a list of all vehicles in the CarRepository
      */
     public List<Car> list() {
-        System.out.println("repository...");
-        System.out.println(repository.findAll());
         return repository.findAll();
     }
 
@@ -102,13 +100,6 @@ public class CarService {
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         } else {
-//            System.out.println(car.getLocation());
-//            System.out.println(car.getCondition());
-//            System.out.println(car.getCreatedAt());
-//            System.out.println(car.getDetails());
-//            System.out.println(car.getLocation());
-//            System.out.println(car.getModifiedAt());
-//            System.out.println(car.getPrice());
             return repository.save(car);
         }
     }
@@ -122,12 +113,14 @@ public class CarService {
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
-
-
         /**
          * TODO: Delete the car from the repository.
          */
-
-
+        Optional<Car> carFound = repository.findById(id);
+        if (!carFound.isPresent()) {
+            throw new CarNotFoundException();
+        } else {
+            repository.deleteById(id);
+        }
     }
 }
