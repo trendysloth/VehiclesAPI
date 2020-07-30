@@ -23,15 +23,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class CarService {
     private final CarRepository repository;
-    private final MapsClient webClientMaps;
-    private final PriceClient webClientPricing;
+    private PriceClient priceClient;
+    private MapsClient mapClient;
 
-    public CarService(@ModelAttribute ModelMapper modelMapper, CarRepository repository,
-                      @Qualifier("maps") WebClient webClientMaps,
-                      @Qualifier("pricing") WebClient webClientPricing) {
+    public CarService(CarRepository repository,PriceClient priceClient, MapsClient mapClient) {
         this.repository = repository;
-        this.webClientMaps = new MapsClient(webClientMaps, modelMapper);
-        this.webClientPricing = new PriceClient(webClientPricing);
+        this.priceClient = priceClient;
+        this.mapClient = mapClient;
     }
 
     /**
@@ -68,21 +66,15 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
-        Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
-        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
-        try {
-            String priceString = webClientPricing.getPrice(id);
-            car.setPrice(priceString);
-        } catch (Exception e) {
-            return null;
+        Optional<Car> carFound = repository.findById(id);
+        if(!carFound.isPresent()){
+            throw new CarNotFoundException();
+        } else {
+            Car car = carFound.get();
+            car.setPrice(priceClient.getPrice(id));
+            car.setLocation(mapClient.getAddress(car.getLocation()));
+            return car;
         }
-        try {
-            Location location = webClientMaps.getAddress(car.getLocation());
-            car.setLocation(location);
-        } catch (Exception e) {
-            return null;
-        }
-        return car;
     }
 
     /**
