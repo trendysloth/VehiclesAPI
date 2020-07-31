@@ -1,5 +1,7 @@
 package com.udacity.vehicles.config;
 
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -13,6 +15,11 @@ import java.util.Collections;
 
 @Configuration
 @EnableSwagger2
+@ApiResponses(value = {
+    @ApiResponse(code=400, message = "Bad request"),
+    @ApiResponse(code=401, message = "Unauthorized"),
+    @ApiResponse(code=500, message = "Internal server error")
+})
 public class SwaggerConfig {
     @Bean
     public Docket api() {
