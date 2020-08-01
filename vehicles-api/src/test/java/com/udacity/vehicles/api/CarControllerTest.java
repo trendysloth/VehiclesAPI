@@ -4,9 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,6 +31,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
  * Implements testing of the CarController class.
@@ -119,6 +118,27 @@ public class CarControllerTest {
             .accept(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(status().is(200));
     }
+
+    /**
+     * Tests the update for a single car by ID.
+     * @throws Exception if the read operation for a single car fails
+     */
+    @Test
+    public void updateCar() throws Exception {
+        /**
+         * TODO: Add a test to check that the `get` method works by calling
+         *   a vehicle by ID. This should utilize the car from `getCar()` below.
+         */
+        Car car = getCar();
+        car.setLocation(new Location(-40.730610, 73.935242));
+
+        mvc.perform(put(new URI("/cars/1"))
+                .content(json.write(car).getJson())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is(200));
+    }
+
 
     /**
      * Tests the deletion of a single car by ID.
